@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 
-var _vim_readline_init = function(prompt, promptWidth, lineCallback) {
+module.exports = function(prompts, lineCallback) {
     var initReadline = function() {
         var self = this;
         var jTimer = null;
         var num_re = /\d/;
         var infty = 9999999;
-        self.prompt = prompt;
-        self.promptWidth = promptWidth;
 
         self.line = "";
         self.cmdStack = "";
@@ -17,13 +15,29 @@ var _vim_readline_init = function(prompt, promptWidth, lineCallback) {
         // does NOT represent actual position of terminal cursor
         self.cursorPos = 0;
 
+        var getPrompt = function() {
+            if(self.insertMode) {
+                return prompts.insertPrompt;
+            } else {
+                return prompts.normalPrompt;
+            }
+        };
+
+        var getPromptLen = function() {
+            if(self.insertMode) {
+                return prompts.insertPromptLen;
+            } else {
+                return prompts.normalPromptLen;
+            }
+        };
+
         self.redraw = function() {
             promptClear();
 
-            var fullLine = self.prompt + self.line;
+            var fullLine = getPrompt() + self.line;
 
             // left bound at cursor pos - half terminal width
-            var lb = Math.floor((self.promptWidth + self.cursorPos) -
+            var lb = Math.floor((getPromptLen() + self.cursorPos) -
                                 process.stdout.columns / 2);
             // is non negative
             lb = Math.max(0, lb);
@@ -39,7 +53,7 @@ var _vim_readline_init = function(prompt, promptWidth, lineCallback) {
 
             realCursorReset();
             process.stdout.write(line);
-            realCursorToPos(self.promptWidth + self.cursorPos - lb);
+            realCursorToPos(getPromptLen() + self.cursorPos - lb);
             //console.log();
             //console.log(lb, rb, self.cursorPos, process.stdout.columns);
         };
@@ -89,7 +103,7 @@ var _vim_readline_init = function(prompt, promptWidth, lineCallback) {
 
         var promptClear = function() {
             realCursorReset();
-            process.stdout.write(Array(process.stdout.columns + 1 - self.promptWidth).join(' '));
+            process.stdout.write(Array(process.stdout.columns + 1 - getPromptLen()).join(' '));
         };
 
         var onquit = function() {
@@ -164,25 +178,25 @@ var _vim_readline_init = function(prompt, promptWidth, lineCallback) {
 
                 // enter insert mode
                 else if (chr === 'i') {
-                    self.insertMode = true;
+                    self.gotoInsertMode();
                     flushCmdStack();
                     break;
                 }
                 else if (chr === 'I') {
                     cursorLeft(infty);
-                    self.insertMode = true;
+                    self.gotoInsertMode();
                     flushCmdStack();
                     break;
                 }
                 else if (chr === 'a') {
                     cursorRight(1);
-                    self.insertMode = true;
+                    self.gotoInsertMode();
                     flushCmdStack();
                     break;
                 }
                 else if (chr === 'A') {
                     cursorRight(infty);
-                    self.insertMode = true;
+                    self.gotoInsertMode();
                     flushCmdStack();
                     break;
                 }
@@ -250,9 +264,17 @@ var _vim_readline_init = function(prompt, promptWidth, lineCallback) {
             }
         };
 
-        var normalMode = function() {
+        self.gotoNormalMode = function() {
             self.insertMode = false;
             cursorLeft(1);
+
+            self.redraw();
+        };
+
+        self.gotoInsertMode = function() {
+            self.insertMode = true;
+
+            self.redraw();
         };
 
         var insertAtCursorPos = function(input) {
@@ -267,7 +289,7 @@ var _vim_readline_init = function(prompt, promptWidth, lineCallback) {
         var parseInsertCmd = function(input) {
             // escape
             if (input === '1b') {
-                normalMode();
+                self.gotoNormalMode();
                 return false;
             }
 
@@ -284,7 +306,7 @@ var _vim_readline_init = function(prompt, promptWidth, lineCallback) {
                 var curTime = new Date();
 
                 if (jTimer) {
-                    normalMode();
+                    self.gotoNormalMode();
                     clearTimeout(jTimer);
                     jTimer = null;
                 } else {
@@ -337,5 +359,3 @@ var _vim_readline_init = function(prompt, promptWidth, lineCallback) {
 
     return new initReadline();
 };
-
-module.exports = _vim_readline_init;
