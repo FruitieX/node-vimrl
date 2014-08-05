@@ -357,10 +357,6 @@ module.exports = function(prompts, lineCallback) {
                     }
                 }
             }
-            /*
-            else if (cmd === 'd') {
-            }
-            */
 
             // motion
             else {
