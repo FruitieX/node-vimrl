@@ -302,6 +302,7 @@ module.exports = function(prompts, lineCallback) {
                 return false;
             }
 
+            // 'jj' works as escape
             else if (input === '6a') {
                 var curTime = new Date();
 
