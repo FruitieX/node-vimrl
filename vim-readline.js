@@ -156,9 +156,9 @@ module.exports = function(prompts, lineCallback) {
                     return true;
 
                 // TODO: cnt
-                var tempLine = self.line.substr(self.cursorPos);
+                var tempLine = self.line.substr(self.cursorPos + 1);
 
-                var numChars = tempLine.indexOf(args);
+                var numChars = tempLine.indexOf(args) + 1;
 
                 if (numChars > 0)
                     return parseInt(numChars);
@@ -172,7 +172,7 @@ module.exports = function(prompts, lineCallback) {
                 var tempLine = self.line.substr(0, self.cursorPos);
                 tempLine = tempLine.split("").reverse().join("");
 
-                var numChars = tempLine.indexOf(chr);
+                var numChars = tempLine.indexOf(args);
 
                 if (numChars > -1)
                     return parseInt(-numChars - 1);
