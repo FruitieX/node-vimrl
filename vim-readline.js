@@ -161,7 +161,7 @@ module.exports = function(prompts, lineCallback) {
                 var numChars = tempLine.indexOf(args);
 
                 if (numChars > 0)
-                    return numChars;
+                    return parseInt(numChars);
             }
             else if (motion === 'F') {
                 // motion is valid, but we need args
@@ -175,13 +175,13 @@ module.exports = function(prompts, lineCallback) {
                 var numChars = tempLine.indexOf(chr);
 
                 if (numChars > -1)
-                    return -numChars - 1;
+                    return parseInt(-numChars - 1);
             }
             else if (motion === 'h') {
-                return -(cnt || 1);
+                return parseInt(-(cnt || 1));
             }
             else if (motion === 'l') {
-                return cnt || 1;
+                return parseInt(cnt || 1);
             }
             else if (motion === 'W' || motion === 'w') {
                 // TODO: cnt
@@ -193,7 +193,7 @@ module.exports = function(prompts, lineCallback) {
                 var numChars = charIdInString(tempLine, ' ', cnt) + 1;
 
                 if(numChars)
-                    return numChars;
+                    return parseInt(numChars);
             }
             else if (motion === 'B' || motion === 'b') {
                 // TODO: cnt
@@ -212,7 +212,7 @@ module.exports = function(prompts, lineCallback) {
                 if(tempLine.indexOf(' ') === -1)
                     numChars = infty;
 
-                return -numChars;
+                return parseInt(-numChars);
             }
             else if (motion === '$') {
                 return infty;
@@ -283,11 +283,12 @@ module.exports = function(prompts, lineCallback) {
                         return;
                     } else {
                         if(movement > 0) {
-                            self.line = self.line.slice(0, self.cursorPos) +
-                                        self.line.slice(self.cursorPos - 1 + movement);
+                            console.log('\n' + self.cursorPos + ',' + movement + ',' + (self.cursorPos + movement));
+                            console.log('\n\nbefore:' + self.line + '\n\n');
+                            self.line = self.line.slice(0, self.cursorPos) + self.line.slice(self.cursorPos + movement);
+                            console.log('\n\n' + self.line + '\n\n');
                         } else if (movement < 0) {
-                            self.line = self.line.slice(0, self.cursorPos + movement) +
-                                        self.line.slice(self.cursorPos);
+                            self.line = self.line.slice(0, self.cursorPos + movement) + self.line.slice(self.cursorPos);
                             cursorLeft(-movement);
                         }
 
