@@ -236,7 +236,11 @@ module.exports = function(prompts, lineCallback) {
         };
 
         var parseCmdStack = function() {
-            var cmd = self.cmdStack[0];
+            // find first non-digit character
+            var cmdPos = self.cmdStack.search(/\D/);
+
+            var cnt = parseInt(self.cmdStack.substr(0, cmdPos));
+            var cmd = self.cmdStack.substr(cmdPos, 1);
 
             // quit
             if(cmd === 'q') {
@@ -278,7 +282,7 @@ module.exports = function(prompts, lineCallback) {
             }
             else if (cmd === 'x') {
                 self.line = self.line.slice(0, self.cursorPos) +
-                            self.line.slice(self.cursorPos + 1);
+                            self.line.slice(self.cursorPos + (cnt || 1));
                 self.redraw();
                 flushCmdStack();
             }
