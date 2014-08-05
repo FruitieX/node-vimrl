@@ -328,12 +328,13 @@ module.exports = function(prompts, lineCallback) {
                     flushCmdStack();
                 }
                 else {
-                    var movement = getMovement(self.cmdStack.substr(1));
-                    var motion = self.cmdStack.substr(self.cmdStack.substr(1).search(/\D/), 1);
+                    var movement = getMovement(self.cmdStack.substr(cmdPos+1));
+                    var motion = self.cmdStack[self.cmdStack.substr(cmdPos+1).search(/\D/) + cmdPos+1];
 
                     // HACK: increase size of movement by one in these commands
-                    if(motion === 'f' || motion === 'F' || motion === 't' || motion === 'T') {
-                        movement += (movement / Math.abs(movement));
+                    if((movement != true && movement != false) && (motion === 'f' || motion === 'F' || motion === 't' || motion === 'T')) {
+                        // TODO: figure out why we need to increment by two, not one
+                        movement += (movement / Math.abs(movement)) * 2;
                     }
 
                     if(movement === false) {
