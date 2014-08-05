@@ -133,14 +133,13 @@ module.exports = function(prompts, lineCallback) {
         // returns false on error and true if motion is undecided,
         // movement otherwise (negative if cursor should move left)
         var getMovement = function(cmd) {
-            // no motion given
-            if(!cmd) {
-                return true;
-            }
-
             // valid motion is: [cnt] motion [args]
             // find first non-digit character
             var motionPos = cmd.search(/\D/);
+            // no motion yet given
+            if(motionPos === -1)
+                return true;
+
             var cnt = cmd.substr(0, motionPos);
             var motion = cmd.substr(motionPos, 1);
             var args = cmd.substr(motionPos + 1);
