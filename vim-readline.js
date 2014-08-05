@@ -134,6 +134,7 @@ module.exports = function(prompts, lineCallback) {
         // movement otherwise (negative if cursor should move left)
         var getMovement = function(cmd) {
             // valid motion is: [cnt] motion [args]
+
             // find first non-digit character
             var motionPos = cmd.search(/\D/);
             // no motion yet given
@@ -143,11 +144,12 @@ module.exports = function(prompts, lineCallback) {
             var cnt = cmd.substr(0, motionPos);
             var motion = cmd.substr(motionPos, 1);
             var args = cmd.substr(motionPos + 1);
+            //console.log('\n' + cmd + ',' + cnt + ',' + motion + ',' + args + ',' + motionPos);
 
             // no motion if we multiply everything by zero
-            if (cnt === 0) {
+            if(cnt === 0)
                 return 0;
-            }
+
             else if (motion === 'f') {
                 // motion is valid, but we need args
                 if(!args)
@@ -265,25 +267,63 @@ module.exports = function(prompts, lineCallback) {
                 flushCmdStack();
             }
             else if (cmd === 'c') {
-                var movement = getMovement(self.cmdStack.substr(1));
-
-                if(movement === false) {
-                    // invalid motion, flush cmd stack
-                    flushCmdStack();
-                } else if (movement === true) {
-                    return;
-                } else {
-                    if(movement > 0) {
-                        self.line = self.line.slice(0, self.cursorPos) +
-                                    self.line.slice(self.cursorPos - 1 + movement);
-                    } else if (movement < 0) {
-                        self.line = self.line.slice(0, self.cursorPos + movement) +
-                                    self.line.slice(self.cursorPos);
-                        cursorLeft(-movement);
-                    }
-
+                if(self.cmdStack[1] === 'c') {
+                    self.line = "";
+                    self.cursorPos = 0;
                     self.gotoInsertMode();
                     flushCmdStack();
+                }
+                else {
+                    var movement = getMovement(self.cmdStack.substr(1));
+
+                    if(movement === false) {
+                        // invalid motion, flush cmd stack
+                        flushCmdStack();
+                    } else if (movement === true) {
+                        return;
+                    } else {
+                        if(movement > 0) {
+                            self.line = self.line.slice(0, self.cursorPos) +
+                                        self.line.slice(self.cursorPos - 1 + movement);
+                        } else if (movement < 0) {
+                            self.line = self.line.slice(0, self.cursorPos + movement) +
+                                        self.line.slice(self.cursorPos);
+                            cursorLeft(-movement);
+                        }
+
+                        self.gotoInsertMode();
+                        flushCmdStack();
+                    }
+                }
+            }
+            else if (cmd === 'd') {
+                if(self.cmdStack[1] === 'd') {
+                    self.line = "";
+                    self.cursorPos = 0;
+                    self.redraw();
+                    flushCmdStack();
+                }
+                else {
+                    var movement = getMovement(self.cmdStack.substr(1));
+
+                    if(movement === false) {
+                        // invalid motion, flush cmd stack
+                        flushCmdStack();
+                    } else if (movement === true) {
+                        return;
+                    } else {
+                        if(movement > 0) {
+                            self.line = self.line.slice(0, self.cursorPos) +
+                                        self.line.slice(self.cursorPos - 1 + movement);
+                        } else if (movement < 0) {
+                            self.line = self.line.slice(0, self.cursorPos + movement) +
+                                        self.line.slice(self.cursorPos);
+                            cursorLeft(-movement);
+                        }
+
+                        self.redraw();
+                        flushCmdStack();
+                    }
                 }
             }
             /*
@@ -305,6 +345,8 @@ module.exports = function(prompts, lineCallback) {
                     flushCmdStack();
                 } else if(movement < 0) {
                     cursorLeft(-movement);
+                    flushCmdStack();
+                } else {
                     flushCmdStack();
                 }
             }
