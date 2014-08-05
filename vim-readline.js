@@ -240,7 +240,7 @@ module.exports = function(prompts, lineCallback) {
             var cmdPos = self.cmdStack.search(/\D/);
 
             var cnt = parseInt(self.cmdStack.substr(0, cmdPos));
-            var cmd = self.cmdStack.substr(cmdPos, 1);
+            var cmd = self.cmdStack[cmdPos];
 
             // quit
             if(cmd === 'q') {
@@ -287,18 +287,18 @@ module.exports = function(prompts, lineCallback) {
                 flushCmdStack();
             }
             else if (cmd === 'c') {
-                if(self.cmdStack[1] === 'c') {
+                if(self.cmdStack[cmdPos+1] === 'c') {
                     self.line = "";
                     self.cursorPos = 0;
                     self.gotoInsertMode();
                     flushCmdStack();
                 }
                 else {
-                    var movement = getMovement(self.cmdStack.substr(1));
-                    var motion = self.cmdStack.substr(self.cmdStack.substr(1).search(/\D/), 1);
+                    var movement = getMovement(self.cmdStack.substr(cmdPos+1));
+                    var motion = self.cmdStack[self.cmdStack.substr(cmdPos+1).search(/\D/) + cmdPos+1];
 
                     // HACK: increase size of movement by one in these commands
-                    if(motion === 'f' || motion === 'F' || motion === 't' || motion === 'T') {
+                    if((movement != true && movement != false) && (motion === 'f' || motion === 'F' || motion === 't' || motion === 'T')) {
                         movement += (movement / Math.abs(movement));
                     }
 
