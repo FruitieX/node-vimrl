@@ -135,6 +135,12 @@ module.exports = function(prompts, lineCallback) {
         var getMovement = function(cmd) {
             // valid motion is: [cnt] motion [args]
 
+            // zero is a bit tricky to parse
+            if (cmd[0] === '0' || cmd[0] === '^') {
+                return -infty;
+            }
+            // from now we assume that a digit represents a count
+
             // find first non-digit character
             var motionPos = cmd.search(/\D/);
             // no motion yet given
@@ -144,18 +150,21 @@ module.exports = function(prompts, lineCallback) {
             var cnt = cmd.substr(0, motionPos);
             var motion = cmd.substr(motionPos, 1);
             var args = cmd.substr(motionPos + 1);
-            //console.log('\n' + cmd + ',' + cnt + ',' + motion + ',' + args + ',' + motionPos);
 
             // no motion if we multiply everything by zero
             if(cnt === 0)
                 return 0;
 
-            else if (motion === 'f') {
+            else if (motion === 't' || motion === 'f') {
                 // motion is valid, but we need args
                 if(!args)
                     return true;
 
-                var tempLine = self.line.substr(self.cursorPos + 1);
+                var tempLine;
+                if(motion === 't')
+                    tempLine = self.line.substr(self.cursorPos + 2);
+                else
+                    tempLine = self.line.substr(self.cursorPos + 1);
 
                 if(cnt)
                     cnt--;
@@ -164,13 +173,17 @@ module.exports = function(prompts, lineCallback) {
                 if (numChars > 0 && numChars !== infty)
                     return parseInt(numChars);
             }
-            else if (motion === 'F') {
+            else if (motion === 'T' || motion === 'F') {
                 // motion is valid, but we need args
                 if(!args)
                     return true;
 
                 // TODO: cnt
-                var tempLine = self.line.substr(0, self.cursorPos);
+                var tempLine;
+                if(motion === 'T')
+                    tempLine = self.line.substr(0, self.cursorPos - 1);
+                else
+                    tempLine = self.line.substr(0, self.cursorPos);
                 tempLine = tempLine.split("").reverse().join("");
 
                 var numChars = tempLine.indexOf(args);
@@ -216,9 +229,6 @@ module.exports = function(prompts, lineCallback) {
             }
             else if (motion === '$') {
                 return infty;
-            }
-            else if (motion === '0' || motion === '^') {
-                return -infty;
             }
 
             // not a valid motion, let the cmd stack be cleared
@@ -266,6 +276,12 @@ module.exports = function(prompts, lineCallback) {
                 self.gotoInsertMode();
                 flushCmdStack();
             }
+            else if (cmd === 'x') {
+                self.line = self.line.slice(0, self.cursorPos) +
+                            self.line.slice(self.cursorPos + 1);
+                self.redraw();
+                flushCmdStack();
+            }
             else if (cmd === 'c') {
                 if(self.cmdStack[1] === 'c') {
                     self.line = "";
@@ -275,6 +291,12 @@ module.exports = function(prompts, lineCallback) {
                 }
                 else {
                     var movement = getMovement(self.cmdStack.substr(1));
+                    var motion = self.cmdStack.substr(self.cmdStack.substr(1).search(/\D/), 1);
+
+                    // HACK: increase size of movement by one in these commands
+                    if(motion === 'f' || motion === 'F' || motion === 't' || motion === 'T') {
+                        movement += (movement / Math.abs(movement));
+                    }
 
                     if(movement === false) {
                         // invalid motion, flush cmd stack
@@ -303,6 +325,12 @@ module.exports = function(prompts, lineCallback) {
                 }
                 else {
                     var movement = getMovement(self.cmdStack.substr(1));
+                    var motion = self.cmdStack.substr(self.cmdStack.substr(1).search(/\D/), 1);
+
+                    // HACK: increase size of movement by one in these commands
+                    if(motion === 'f' || motion === 'F' || motion === 't' || motion === 'T') {
+                        movement += (movement / Math.abs(movement));
+                    }
 
                     if(movement === false) {
                         // invalid motion, flush cmd stack
