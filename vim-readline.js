@@ -283,10 +283,7 @@ module.exports = function(prompts, lineCallback) {
                         return;
                     } else {
                         if(movement > 0) {
-                            console.log('\n' + self.cursorPos + ',' + movement + ',' + (self.cursorPos + movement));
-                            console.log('\n\nbefore:' + self.line + '\n\n');
                             self.line = self.line.slice(0, self.cursorPos) + self.line.slice(self.cursorPos + movement);
-                            console.log('\n\n' + self.line + '\n\n');
                         } else if (movement < 0) {
                             self.line = self.line.slice(0, self.cursorPos + movement) + self.line.slice(self.cursorPos);
                             cursorLeft(-movement);
