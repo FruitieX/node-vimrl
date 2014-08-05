@@ -144,6 +144,7 @@ module.exports = function(prompts, lineCallback) {
             var motion = cmd.substr(motionPos, 1);
             var args = cmd.substr(motionPos + 1);
 
+            // no motion if we multiply everything by zero
             if (cnt === 0) {
                 return 0;
             }
