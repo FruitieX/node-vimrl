@@ -155,12 +155,13 @@ module.exports = function(prompts, lineCallback) {
                 if(!args)
                     return true;
 
-                // TODO: cnt
                 var tempLine = self.line.substr(self.cursorPos + 1);
 
-                var numChars = tempLine.indexOf(args) + 1;
+                if(cnt)
+                    cnt--;
+                var numChars = charIdInString(tempLine, args, cnt) + 1;
 
-                if (numChars > 0)
+                if (numChars > 0 && numChars !== infty)
                     return parseInt(numChars);
             }
             else if (motion === 'F') {
@@ -184,7 +185,6 @@ module.exports = function(prompts, lineCallback) {
                 return parseInt(cnt || 1);
             }
             else if (motion === 'W' || motion === 'w') {
-                // TODO: cnt
                 var tempLine = self.line.substr(self.cursorPos);
 
                 if(cnt)
