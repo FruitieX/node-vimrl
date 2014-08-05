@@ -130,136 +130,182 @@ module.exports = function(prompts, lineCallback) {
             return infty;
         };
 
+        // returns false on error and true if motion is undecided,
+        // movement otherwise (negative if cursor should move left)
+        var getMovement = function(cmd) {
+            // no motion given
+            if(!cmd) {
+                return true;
+            }
+
+            // valid motion is: [cnt] motion [args]
+            // find first non-digit character
+            var motionPos = cmd.search(/\D/);
+            var cnt = cmd.substr(0, motionPos);
+            var motion = cmd.substr(motionPos, 1);
+            var args = cmd.substr(motionPos + 1);
+
+            if (cnt === 0) {
+                return 0;
+            }
+            else if (motion === 'f') {
+                // motion is valid, but we need args
+                if(!args)
+                    return true;
+
+                // TODO: cnt
+                var tempLine = self.line.substr(self.cursorPos);
+
+                var numChars = tempLine.indexOf(args);
+
+                if (numChars > 0)
+                    return numChars;
+            }
+            else if (motion === 'F') {
+                // motion is valid, but we need args
+                if(!args)
+                    return true;
+
+                // TODO: cnt
+                var tempLine = self.line.substr(0, self.cursorPos);
+                tempLine = tempLine.split("").reverse().join("");
+
+                var numChars = tempLine.indexOf(chr);
+
+                if (numChars > -1)
+                    return -numChars - 1;
+            }
+            else if (motion === 'h') {
+                return -(cnt || 1);
+            }
+            else if (motion === 'l') {
+                return cnt || 1;
+            }
+            else if (motion === 'W' || motion === 'w') {
+                // TODO: cnt
+                var tempLine = self.line.substr(self.cursorPos);
+
+                if(cnt)
+                    cnt -= 1;
+
+                var numChars = charIdInString(tempLine, ' ', cnt) + 1;
+
+                if(numChars)
+                    return numChars;
+            }
+            else if (motion === 'B' || motion === 'b') {
+                // TODO: cnt
+                var tempLine = self.line.substr(0, self.cursorPos - 1);
+                tempLine = tempLine.split("").reverse().join("");
+
+                var numChars = 0;
+
+                while(tempLine[0] === ' ') {
+                    numChars++;
+                    tempLine = tempLine.substr(1);
+                }
+
+                numChars += tempLine.indexOf(' ') + 1;
+
+                if(tempLine.indexOf(' ') === -1)
+                    numChars = infty;
+
+                return -numChars;
+            }
+            else if (motion === '$') {
+                return infty;
+            }
+            else if (motion === '0' || motion === '^') {
+                return -infty;
+            }
+
+            // not a valid motion, let the cmd stack be cleared
+            return false;
+        };
+
         var parseCmdStack = function() {
-            var cnt = '';
+            var cmd = self.cmdStack[0];
 
-            for(var i = 0; i < self.cmdStack.length; i++) {
-                var chr = self.cmdStack[i];
-                // quit
-                if(chr === 'q') {
-                    onquit();
+            // quit
+            if(cmd === 'q') {
+                onquit();
+                flushCmdStack();
+            }
+
+            // replace char
+            else if (cmd === 'r') {
+                var start = self.line.substr(0, self.cursorPos);
+                var end = self.line.substr(self.cursorPos + 1);
+                var chr = self.cmdStack[1];
+
+                self.line = start + chr + end;
+
+                flushCmdStack();
+                self.redraw();
+            }
+
+            // enter insert mode
+            else if (cmd === 'i') {
+                self.gotoInsertMode();
+                flushCmdStack();
+            }
+            else if (cmd === 'I') {
+                cursorLeft(infty);
+                self.gotoInsertMode();
+                flushCmdStack();
+            }
+            else if (cmd === 'a') {
+                cursorRight(1);
+                self.gotoInsertMode();
+                flushCmdStack();
+            }
+            else if (cmd === 'A') {
+                cursorRight(infty);
+                self.gotoInsertMode();
+                flushCmdStack();
+            }
+            else if (cmd === 'c') {
+                var movement = getMovement(self.cmdStack.substr(1));
+
+                if(movement === false) {
+                    // invalid motion, flush cmd stack
                     flushCmdStack();
-                    break;
-                }
-
-                // find
-                else if (self.cmdStack[i-1] === 'f') {
-                    var tempLine = self.line.substr(self.cursorPos);
-
-                    var numChars = tempLine.indexOf(chr);
-
-                    if (numChars > 0)
-                        cursorRight(numChars);
-
-                    flushCmdStack();
-                }
-                else if (self.cmdStack[i-1] === 'F') {
-                    var tempLine = self.line.substr(0, self.cursorPos);
-                    tempLine = tempLine.split("").reverse().join("");
-
-                    var numChars = tempLine.indexOf(chr);
-
-                    if (numChars > -1)
-                        cursorLeft(numChars + 1);
-
-                    flushCmdStack();
-                }
-
-                // replace char
-                else if (self.cmdStack[i-1] === 'r') {
-                    var start = self.line.substr(0, self.cursorPos);
-                    var end = self.line.substr(self.cursorPos + 1);
-
-                    self.line = start + chr + end;
-
-                    flushCmdStack();
-                    self.redraw();
-                }
-
-                // enter insert mode
-                else if (chr === 'i') {
-                    self.gotoInsertMode();
-                    flushCmdStack();
-                    break;
-                }
-                else if (chr === 'I') {
-                    cursorLeft(infty);
-                    self.gotoInsertMode();
-                    flushCmdStack();
-                    break;
-                }
-                else if (chr === 'a') {
-                    cursorRight(1);
-                    self.gotoInsertMode();
-                    flushCmdStack();
-                    break;
-                }
-                else if (chr === 'A') {
-                    cursorRight(infty);
-                    self.gotoInsertMode();
-                    flushCmdStack();
-                    break;
-                }
-
-                // movements
-                else if (chr === 'h') {
-                    cursorLeft(cnt || 1);
-                    flushCmdStack();
-                    break;
-                }
-                else if (chr === 'l') {
-                    cursorRight(cnt || 1);
-                    flushCmdStack();
-                    break;
-                }
-                else if (chr === 'W' || chr === 'w') {
-                    var tempLine = self.line.substr(self.cursorPos);
-
-                    if(cnt)
-                        cnt -= 1;
-
-                    var numChars = charIdInString(tempLine, ' ', cnt) + 1;
-
-                    if(numChars)
-                        cursorRight(numChars);
-
-                    flushCmdStack();
-                    break;
-                }
-                else if (chr === 'B' || chr === 'b') {
-                    var tempLine = self.line.substr(0, self.cursorPos - 1);
-                    tempLine = tempLine.split("").reverse().join("");
-
-                    var numChars = 0;
-
-                    while(tempLine[0] === ' ') {
-                        numChars++;
-                        tempLine = tempLine.substr(1);
+                } else if (movement === true) {
+                    return;
+                } else {
+                    if(movement > 0) {
+                        self.line = self.line.slice(0, self.cursorPos) +
+                                    self.line.slice(self.cursorPos - 1 + movement);
+                    } else if (movement < 0) {
+                        self.line = self.line.slice(0, self.cursorPos + movement) +
+                                    self.line.slice(self.cursorPos);
+                        cursorLeft(-movement);
                     }
 
-                    numChars += tempLine.indexOf(' ') + 1;
-
-                    if(tempLine.indexOf(' ') === -1)
-                        numChars = infty;
-
-                    cursorLeft(numChars);
-
+                    self.gotoInsertMode();
                     flushCmdStack();
-                    break;
                 }
-                else if (chr === '$') {
-                    cursorRight(infty);
-                    flushCmdStack();
-                    break;
-                }
-                else if (chr === '0' || chr === '^') {
-                    cursorLeft(infty);
-                    flushCmdStack();
-                    break;
-                }
+            }
+            /*
+            else if (cmd === 'd') {
+            }
+            */
 
-                else if (num_re.exec(self.cmdStack)) {
-                    cnt += num_re.exec(self.cmdStack)[0];
+            // motion
+            else {
+                var movement = getMovement(self.cmdStack);
+
+                if(movement === false) {
+                    // invalid motion, flush cmd stack
+                    flushCmdStack();
+                } else if (movement === true) {
+                    return;
+                } else if(movement > 0) {
+                    cursorRight(movement);
+                    flushCmdStack();
+                } else if(movement < 0) {
+                    cursorLeft(-movement);
+                    flushCmdStack();
                 }
             }
         };
