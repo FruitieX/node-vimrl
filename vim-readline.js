@@ -309,9 +309,11 @@ module.exports = function(prompts, lineCallback) {
                         return;
                     } else {
                         if(movement > 0) {
-                            self.line = self.line.slice(0, self.cursorPos) + self.line.slice(self.cursorPos + movement);
+                            self.line = self.line.slice(0, self.cursorPos) +
+                                        self.line.slice(self.cursorPos + movement);
                         } else if (movement < 0) {
-                            self.line = self.line.slice(0, self.cursorPos + movement) + self.line.slice(self.cursorPos);
+                            self.line = self.line.slice(0, self.cursorPos + movement) +
+                                        self.line.slice(self.cursorPos);
                             cursorLeft(-movement);
                         }
 
@@ -333,8 +335,7 @@ module.exports = function(prompts, lineCallback) {
 
                     // HACK: increase size of movement by one in these commands
                     if((movement != true && movement != false) && (motion === 'f' || motion === 'F' || motion === 't' || motion === 'T')) {
-                        // TODO: figure out why we need to increment by two, not one
-                        movement += (movement / Math.abs(movement)) * 2;
+                        movement += (movement / Math.abs(movement));
                     }
 
                     if(movement === false) {
@@ -345,7 +346,7 @@ module.exports = function(prompts, lineCallback) {
                     } else {
                         if(movement > 0) {
                             self.line = self.line.slice(0, self.cursorPos) +
-                                        self.line.slice(self.cursorPos - 1 + movement);
+                                        self.line.slice(self.cursorPos + movement);
                         } else if (movement < 0) {
                             self.line = self.line.slice(0, self.cursorPos + movement) +
                                         self.line.slice(self.cursorPos);
