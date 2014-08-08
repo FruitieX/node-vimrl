@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 module.exports = function(prompts, lineCallback) {
     var initReadline = function() {
         var self = this;
@@ -441,10 +439,7 @@ module.exports = function(prompts, lineCallback) {
 
         self.redraw();
 
-        process.stdin.setRawMode(true);
-
-        process.stdin.on('readable', function() {
-            var input = process.stdin.read();
+        self.handleInput = function(input) {
             //console.log(input.toString('hex'));
 
             if(input) {
@@ -471,7 +466,7 @@ module.exports = function(prompts, lineCallback) {
                     parseCmdStack();
                 }
             }
-        });
+        };
     }
 
     return new initReadline();

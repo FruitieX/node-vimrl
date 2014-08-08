@@ -1,0 +1,24 @@
+{
+  "name": "vimrl",
+  "version": "0.0.1",
+  "description": "vim-like readline implemented entirely in javascript",
+  "main": "vimrl.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FruitieX/node-vimrl"
+  },
+  "keywords": [
+    "readline",
+    "vim",
+    "node"
+  ],
+  "author": "FruitieX",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FruitieX/node-vimrl/issues"
+  },
+  "homepage": "https://github.com/FruitieX/node-vimrl"
+}
