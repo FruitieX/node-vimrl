@@ -21,13 +21,35 @@ module.exports = function(prompts, lineCallback) {
             }
         };
 
-        var getPromptSubstring = function(lb, rb, colors) {
-            if(!colors) {
-                if(self.insertMode) {
+        // get substring of prompt, lb/rb = bounds
+        // handles ANSI colors if given for each character in 'prompts.*Colors' array
+        var getPromptSubstring = function(lb, rb) {
+            var retval = "";
+            var i;
+            if(self.insertMode) {
+                if(!prompts.insertPromptColors)
                     return prompts.insertPrompt.substring(lb, rb);
-                } else {
-                    return prompts.normalPrompt.substring(lb, rb);
+
+                if(rb === 0)
+                    return retval;
+
+                // loop over characters until end of string or until rb if !!rb
+                for (i = lb; i < getPromptLen() && (!rb || (rb && i < rb)); i++) {
+                    retval += prompts.insertPromptColors[i] + prompts.insertPrompt[i];
                 }
+                return retval;
+            } else {
+                if(!prompts.normalPromptColors)
+                    return prompts.normalPrompt.substring(lb, rb);
+
+                if(rb === 0)
+                    return retval;
+
+                // loop over characters until end of string or until rb if !!rb
+                for (i = lb; i < getPromptLen() && (!rb || (rb && i < rb)); i++) {
+                    retval += prompts.normalPromptColors[i] + prompts.normalPrompt[i];
+                }
+                return retval;
             }
         };
 
