@@ -71,7 +71,10 @@ module.exports = function(prompts, lineCallback) {
             // right bound
             var rb = lb + process.stdout.columns;
 
-            var line = getPromptSubstring(lb, undefined) + self.line.substring(lb - getPromptLen(), rb - getPromptLen());
+            var line = getPromptSubstring(lb, undefined) +
+                       '\033[000m' + // reset colors
+                       self.line.substring(lb - getPromptLen(),
+                                           rb - getPromptLen());
 
             realCursorReset();
             process.stdout.write(line);
