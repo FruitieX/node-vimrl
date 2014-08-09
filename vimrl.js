@@ -403,17 +403,27 @@ module.exports = function(prompts, lineCallback) {
         var parseInsertCmd = function(input) {
             // escape
             if (input === '1b') {
+                if (jTimer) {
+                    clearTimeout(jTimer);
+                    jTimer = null;
+                    insertAtCursorPos('j');
+                }
                 self.gotoNormalMode();
                 return false;
             }
 
             // backspace
             else if (input === '7f') {
-                self.line = self.line.slice(0, self.cursorPos - 1) +
-                            self.line.slice(self.cursorPos);
-                cursorLeft(1);
-                self.redraw();
-                return false;
+                if (jTimer) {
+                    clearTimeout(jTimer);
+                    jTimer = null;
+                } else {
+                    self.line = self.line.slice(0, self.cursorPos - 1) +
+                                self.line.slice(self.cursorPos);
+                    cursorLeft(1);
+                    self.redraw();
+                    return false;
+                }
             }
 
             // 'jj' works as escape
@@ -432,6 +442,15 @@ module.exports = function(prompts, lineCallback) {
                 }
 
                 return false;
+            }
+
+            // jTimer active, that is a j has been recently input before the
+            // letter we are handling now. Insert j and current letter, clear
+            // jTimer
+            else if (jTimer) {
+                clearTimeout(jTimer);
+                jTimer = null;
+                insertAtCursorPos('j');
             }
 
             return true;
