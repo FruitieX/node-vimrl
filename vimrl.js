@@ -395,8 +395,8 @@ module.exports = function(prompts, lineCallback) {
             var start = self.line.substr(0, self.cursorPos);
             var end = self.line.substr(self.cursorPos);
 
-            self.line = start + input[0] + end;
-            cursorRight(1);
+            self.line = start + input + end;
+            cursorRight(input.length);
             self.redraw();
         };
 
