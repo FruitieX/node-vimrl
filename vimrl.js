@@ -422,8 +422,8 @@ module.exports = function(prompts, lineCallback) {
                                 self.line.slice(self.cursorPos);
                     cursorLeft(1);
                     self.redraw();
-                    return false;
                 }
+                return false;
             }
 
             // 'jj' works as escape
