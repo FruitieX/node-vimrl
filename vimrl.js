@@ -13,26 +13,28 @@ module.exports = function(prompts, lineCallback) {
         // does NOT represent actual position of terminal cursor
         self.cursorPos = 0;
 
-        var getPrompt = function() {
+        var getPromptLen = function() {
             if(self.insertMode) {
-                return prompts.insertPrompt;
+                return prompts.insertPrompt.length;
             } else {
-                return prompts.normalPrompt;
+                return prompts.normalPrompt.length;
             }
         };
 
-        var getPromptLen = function() {
-            if(self.insertMode) {
-                return prompts.insertPromptLen;
-            } else {
-                return prompts.normalPromptLen;
+        var getPromptSubstring = function(lb, rb, colors) {
+            if(!colors) {
+                if(self.insertMode) {
+                    return prompts.insertPrompt.substring(lb, rb);
+                } else {
+                    return prompts.normalPrompt.substring(lb, rb);
+                }
             }
         };
 
         self.redraw = function() {
             promptClear();
 
-            var fullLine = getPrompt() + self.line;
+            var fullLineLength = getPromptLen() + self.line.length;
 
             // left bound at cursor pos - half terminal width
             var lb = Math.floor((getPromptLen() + self.cursorPos) -
@@ -40,14 +42,14 @@ module.exports = function(prompts, lineCallback) {
             // is non negative
             lb = Math.max(0, lb);
             // is not further right than line length - terminal width
-            lb = Math.min(lb, fullLine.length - process.stdout.columns);
+            lb = Math.min(lb, fullLineLength - process.stdout.columns);
             // is still non negative
             lb = Math.max(0, lb);
 
             // right bound
             var rb = lb + process.stdout.columns;
 
-            var line = fullLine.substring(lb, rb);
+            var line = getPromptSubstring(lb, undefined) + self.line.substring(lb - getPromptLen(), rb - getPromptLen());
 
             realCursorReset();
             process.stdout.write(line);
@@ -101,7 +103,7 @@ module.exports = function(prompts, lineCallback) {
 
         var promptClear = function() {
             realCursorReset();
-            process.stdout.write(Array(process.stdout.columns + 1 - getPromptLen()).join(' '));
+            process.stdout.write(Array(process.stdout.columns + 1).join(' '));
         };
 
         var onquit = function() {
