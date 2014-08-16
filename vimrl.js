@@ -505,7 +505,7 @@ module.exports = function(prompts, lineCallback) {
             //console.log(input.toString('hex'));
 
             if(input) {
-                else if(self.insertMode) {
+                if(self.insertMode) {
                     if(parseInsertCmd(input.toString('hex'))) {
                         insertAtCursorPos(input.toString('utf8'));
                     }
