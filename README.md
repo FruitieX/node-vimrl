@@ -4,6 +4,7 @@ vim-like readline implemented entirely in javascript.
 
 Features:
 * Fast, minimal. No external dependencies!
+* Stays on one line, unlike default node readline which wraps around.
 * Does not bind stdin. You have to do that manually, and thus have the freedom
   to process any inputs before passing them on to vimrl.
 * Prints output to last terminal row. This behaviour should be fairly simple to
@@ -28,6 +29,7 @@ TODO
 ----
 * w/b should only move to a separator, not always whitespace as W/B
 * more motions and commands
+* emacs mode for blasphemers?
 
 Example usage
 -------------
