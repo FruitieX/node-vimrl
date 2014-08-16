@@ -2,23 +2,47 @@ node-vim-readline
 =================
 vim-like readline implemented entirely in javascript.
 
-Usage
------
+Features:
+* Fast, minimal. No external dependencies!
+* Does not bind stdin. You have to do that manually, and thus have the freedom
+  to process any inputs before passing them on to vimrl.
+* Prints output to last terminal row. Shouldn't break even if you move the
+  cursor around yourself.
+* Separate insert/normal mode prompts. Supports ANSI colors in the prompts.
+* Supports the following vim-like motions, prefixable by counts:
+    * h, l, j, k: directional movement
+    * w/b, W/B: word forward/back
+    * t/f, T/F: to/find character forward/back
+    * 0, ^, $: beginning/end of line
+* Supports the following vim-like commands, prefixable by above motions:
+    * r: replace character
+    * i, I, a, A: enter insert mode, some move the cursor just like in vim
+    * x: delete character under cursor
+    * c: change motion
+    * d: delete motion
+    * q: quit
+
+TODO
+----
+* w/b should only move to a separator, not always whitespace as W/B
+
+Example usage
+-------------
+See `test.js` for more detailed example.
+
 ```
 var vimrl = require("vimrl");
 
-var prompt_s = 'prompt > ';
-var prompt_s_ins = 'prompt x ';
+var normalPrompt = 'prompt > ';
+var insertPrompt = 'prompt x ';
 var readline = vimrl({
-    normalPrompt: prompt_s,
-    normalPromptLen: prompt_s.length,
-    insertPrompt: prompt_s_ins,
-    insertPromptLen: prompt_s_ins.length
+    normalPrompt: normalPrompt,
+    insertPrompt: insertPrompt
 }, function(line) {
     console.log('\ngot line: ' + line);
 });
 
-// input has to be handled by your app and/or passed on to vimrl
+// you have to pass inputs to vimrl manually
 process.stdin.setRawMode(true);
 process.stdin.on('readable', function() {
     var input = process.stdin.read();
