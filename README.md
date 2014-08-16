@@ -6,8 +6,8 @@ Features:
 * Fast, minimal. No external dependencies!
 * Does not bind stdin. You have to do that manually, and thus have the freedom
   to process any inputs before passing them on to vimrl.
-* Prints output to last terminal row. Shouldn't break even if you move the
-  cursor around yourself.
+* Prints output to last terminal row. This behaviour should be fairly simple to
+  change. vimrl shouldn't break even if you move the cursor around yourself.
 * Separate insert/normal mode prompts. Supports ANSI colors in the prompts.
 * Supports the following vim-like motions, prefixable by counts:
     * h, l, j, k: directional movement
@@ -21,10 +21,13 @@ Features:
     * c: change motion
     * d: delete motion
     * q: quit
+    * escape: go to normal mode
+    * jj: two j characters in quick succession function as esc
 
 TODO
 ----
 * w/b should only move to a separator, not always whitespace as W/B
+* more motions and commands
 
 Example usage
 -------------
