@@ -453,7 +453,7 @@ module.exports = function(prompts, lineCallback) {
                 return false;
             }
 
-            // 'jj' works as escape
+            // j key - 'jj' works as escape
             else if (input === '6a') {
                 var curTime = new Date();
 
@@ -472,12 +472,28 @@ module.exports = function(prompts, lineCallback) {
             }
 
             // jTimer active, that is a j has been recently input before the
-            // letter we are handling now. Insert j and current letter, clear
+            // input we are handling now. Insert j and current letter, clear
             // jTimer
             else if (jTimer) {
                 clearTimeout(jTimer);
                 jTimer = null;
                 insertAtCursorPos('j');
+            }
+
+            // return ("enter key")
+            if(input === '0d') {
+                lineCallback(self.line);
+
+                // reset state
+                self.line = "";
+                self.cursorPos = 0;
+                clearTimeout(jTimer);
+                jTimer = null;
+                flushCmdStack();
+
+                self.redraw();
+
+                return false;
             }
 
             return true;
@@ -489,27 +505,27 @@ module.exports = function(prompts, lineCallback) {
             //console.log(input.toString('hex'));
 
             if(input) {
-                // return ("enter key")
-                if(input.toString('hex') === '0d') {
-                    lineCallback(self.line);
-
-                    // reset state
-                    self.line = "";
-                    self.cursorPos = 0;
-                    clearTimeout(jTimer);
-                    jTimer = null;
-                    flushCmdStack();
-
-                    self.redraw();
-                }
-
                 else if(self.insertMode) {
                     if(parseInsertCmd(input.toString('hex'))) {
                         insertAtCursorPos(input.toString('utf8'));
                     }
                 } else {
-                    self.cmdStack += input.toString('utf8');
-                    parseCmdStack();
+                    // return ("enter key")
+                    if(input.toString('hex') === '0d') {
+                        lineCallback(self.line);
+
+                        // reset state
+                        self.line = "";
+                        self.cursorPos = 0;
+                        clearTimeout(jTimer);
+                        jTimer = null;
+                        flushCmdStack();
+
+                        self.redraw();
+                    } else {
+                        self.cmdStack += input.toString('utf8');
+                        parseCmdStack();
+                    }
                 }
             }
         };
