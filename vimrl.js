@@ -1,9 +1,10 @@
-module.exports = function(prompts, lineCallback) {
+module.exports = function(initPrompt, lineCallback) {
     var initReadline = function() {
         var self = this;
         var jTimer = null;
         var num_re = /\d/;
         var infty = 9999999;
+        var prompts = initPrompt;
 
         self.line = "";
         self.cmdStack = "";
@@ -528,6 +529,12 @@ module.exports = function(prompts, lineCallback) {
                     }
                 }
             }
+        };
+
+        self.changePrompt = function(newPrompts) {
+            prompts = newPrompts;
+
+            self.redraw();
         };
     }
 
