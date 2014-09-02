@@ -5,6 +5,7 @@ module.exports = function(initPrompt, lineCallback) {
         var num_re = /\d/;
         var infty = 9999999;
         var prompts = initPrompt;
+        var completions;
 
         self.line = "";
         self.cmdStack = "";
@@ -472,6 +473,24 @@ module.exports = function(initPrompt, lineCallback) {
                 return false;
             }
 
+            // tab
+            else if (input === '09') {
+                var word = self.line.slice(0, self.cursorPos);
+                var lastNL = word.lastIndexOf(' ') + 1;
+                word = word.substr(lastNL);
+
+                for(var i = 0; i < completions.length; i++) {
+                    if(completions[i].match(new RegExp('^' + word))) {
+                        insertAtCursorPos(completions[i].substr(word.length));
+
+                        break;
+                    }
+                }
+
+                return false;
+            }
+
+
             // jTimer active, that is a j has been recently input before the
             // input we are handling now. Insert j and current letter, clear
             // jTimer
@@ -503,9 +522,9 @@ module.exports = function(initPrompt, lineCallback) {
         self.redraw();
 
         self.handleInput = function(input) {
-            //console.log(input.toString('hex'));
-
             if(input) {
+                //console.log(input.toString('hex'));
+
                 if(self.insertMode) {
                     if(parseInsertCmd(input.toString('hex'))) {
                         insertAtCursorPos(input.toString('utf8'));
@@ -535,6 +554,10 @@ module.exports = function(initPrompt, lineCallback) {
             prompts = newPrompts;
 
             self.redraw();
+        };
+
+        self.setCompletions = function(newCompletions) {
+            completions = newCompletions;
         };
     }
 

@@ -26,6 +26,8 @@ var readline = vimrl({
     console.log('\ngot line: ' + line);
 });
 
+readline.setCompletions(['hello', 'world']);
+
 // disable echoing input to terminal, vimrl will take care of echoing
 process.stdin.setRawMode(true);
 
