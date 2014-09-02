@@ -480,7 +480,7 @@ module.exports = function(initPrompt, lineCallback) {
                 word = word.substr(lastNL);
 
                 for(var i = 0; i < completions.length; i++) {
-                    if(completions[i].match(new RegExp('^' + word))) {
+                    if(completions[i].indexOf(word) === 0) {
                         insertAtCursorPos(completions[i].substr(word.length));
 
                         break;
