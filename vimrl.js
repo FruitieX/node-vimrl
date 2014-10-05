@@ -523,15 +523,31 @@ module.exports = function(initPrompt, lineCallback) {
 
         self.handleInput = function(input) {
             if(input) {
-                //console.log(input.toString('hex'));
+                // sanity checks
+                var inputHex = input.toString('hex');
+                var inputDec = parseInt(inputHex, 16);
 
+                // plenty of weird alt combos start with 1b, ignore them or we
+                // risk breaking the terminal
+                if(inputHex.substring(0, 2) === '1b' && inputHex.length > 2) {
+                    return;
+                }
+
+                // skip most ASCII control chars, except backspace, tab,
+                // return, escape
+                if (inputDec < 32 && inputDec !== 8 && inputDec !== 9
+                        && inputDec !== 13 && inputDec !== 27) {
+                    return;
+                }
+
+                //console.log(input.toString('hex'));
                 if(self.insertMode) {
-                    if(parseInsertCmd(input.toString('hex'))) {
+                    if(parseInsertCmd(inputHex)) {
                         insertAtCursorPos(input.toString('utf8'));
                     }
                 } else {
                     // return ("enter key")
-                    if(input.toString('hex') === '0d') {
+                    if(inputHex === '0d') {
                         lineCallback(self.line);
 
                         // reset state
