@@ -523,44 +523,48 @@ module.exports = function(initPrompt, lineCallback) {
 
         self.handleInput = function(input) {
             if(input) {
-                // sanity checks
-                var inputHex = input.toString('hex');
-                var inputDec = parseInt(inputHex, 16);
+                for(var i = 0; i < input.length; i++) {
+                    //console.log(input);
+                    var inputChar = input.toString('utf8', i, i+1);
+                    var inputHex = input.toString('hex', i, i+1);
+                    var inputDec = parseInt(inputHex, 16);
+                    // sanity checks
 
-                // plenty of weird alt combos start with 1b, ignore them or we
-                // risk breaking the terminal
-                if(inputHex.substring(0, 2) === '1b' && inputHex.length > 2) {
-                    return;
-                }
-
-                // skip most ASCII control chars, except backspace, tab,
-                // return, escape
-                if (inputDec < 32 && inputDec !== 8 && inputDec !== 9
-                        && inputDec !== 13 && inputDec !== 27) {
-                    return;
-                }
-
-                //console.log(input.toString('hex'));
-                if(self.insertMode) {
-                    if(parseInsertCmd(inputHex)) {
-                        insertAtCursorPos(input.toString('utf8'));
+                    // plenty of weird alt combos start with 1b, ignore them or we
+                    // risk breaking the terminal
+                    if(inputHex.substring(0, 2) === '1b' && inputHex.length > 2) {
+                        continue;
                     }
-                } else {
-                    // return ("enter key")
-                    if(inputHex === '0d') {
-                        lineCallback(self.line);
 
-                        // reset state
-                        self.line = "";
-                        self.cursorPos = 0;
-                        clearTimeout(jTimer);
-                        jTimer = null;
-                        flushCmdStack();
+                    // skip most ASCII control chars, except backspace, tab,
+                    // return, escape
+                    if (inputDec < 32 && inputDec !== 8 && inputDec !== 9
+                            && inputDec !== 13 && inputDec !== 27) {
+                        continue;
+                    }
 
-                        self.redraw();
+                    //console.log(input.toString('hex'));
+                    if(self.insertMode) {
+                        if(parseInsertCmd(inputHex)) {
+                            insertAtCursorPos(inputChar);
+                        }
                     } else {
-                        self.cmdStack += input.toString('utf8');
-                        parseCmdStack();
+                        // return ("enter key")
+                        if(inputHex === '0d') {
+                            lineCallback(self.line);
+
+                            // reset state
+                            self.line = "";
+                            self.cursorPos = 0;
+                            clearTimeout(jTimer);
+                            jTimer = null;
+                            flushCmdStack();
+
+                            self.redraw();
+                        } else {
+                            self.cmdStack += inputChar;
+                            parseCmdStack();
+                        }
                     }
                 }
             }
