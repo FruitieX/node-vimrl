@@ -487,10 +487,16 @@ module.exports = function(initPrompt, lineCallback) {
                 var word = self.line.slice(0, self.cursorPos);
                 var lastNL = word.lastIndexOf(' ') + 1;
                 word = word.substr(lastNL);
+                word = word.toLowerCase();
 
                 for(var i = 0; i < completions.length; i++) {
-                    if(completions[i].indexOf(word) === 0) {
-                        insertAtCursorPos(completions[i].substr(word.length));
+                    if(completions[i].toLowerCase().indexOf(word) === 0) {
+                        if(word.length) {
+                            self.line = self.line.slice(0, self.cursorPos - word.length) +
+                                        self.line.slice(self.cursorPos);
+                            cursorLeft(word.length);
+                        }
+                        insertAtCursorPos(completions[i]);
 
                         break;
                     }
