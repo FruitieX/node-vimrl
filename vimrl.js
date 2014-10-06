@@ -2,6 +2,7 @@ module.exports = function(initPrompt, lineCallback) {
     var initReadline = function() {
         var self = this;
         var jTimer = null;
+        var jTimer_date = null;
         var num_re = /\d/;
         var infty = 9999999;
         var prompts = initPrompt;
@@ -457,7 +458,15 @@ module.exports = function(initPrompt, lineCallback) {
 
             // j key - 'jj' works as escape
             else if (input === '6a') {
-                var curTime = new Date();
+
+                if (jTimer && new Date() - jTimer_date < 10) {
+                    insertAtCursorPos('jj');
+                    clearTimeout(jTimer);
+                    jTimer = null;
+                    return false;
+                }
+
+                jTimer_date = new Date();
 
                 if (jTimer) {
                     self.gotoNormalMode();
