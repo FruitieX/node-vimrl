@@ -538,10 +538,12 @@ module.exports = function(initPrompt, lineCallback) {
 
         self.handleInput = function(input) {
             if(input) {
+                input = input.toString('utf8');
+
                 for(var i = 0; i < input.length; i++) {
                     //console.log(input);
-                    var inputChar = input.toString('utf8', i, i+1);
-                    var inputHex = input.toString('hex', i, i+1);
+                    var inputChar = input[i];
+                    var inputHex = new Buffer(input[i], 'utf8').toString('hex');
                     var inputDec = parseInt(inputHex, 16);
                     // sanity checks
 
